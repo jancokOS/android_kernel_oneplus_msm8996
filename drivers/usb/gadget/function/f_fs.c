@@ -1821,19 +1821,12 @@ static int ffs_func_eps_enable(struct ffs_function *func)
 		ep->ep->driver_data = ep;
 		ep->ep->desc = ds;
 
-		if (needs_comp_desc) {
-			comp_desc = (struct usb_ss_ep_comp_descriptor *)(ds +
-					USB_DT_ENDPOINT_SIZE);
-			ep->ep->maxburst = comp_desc->bMaxBurst + 1;
-			ep->ep->comp_desc = comp_desc;
-		}
+		comp_desc = (struct usb_ss_ep_comp_descriptor *)(ds +
+				USB_DT_ENDPOINT_SIZE);
+		ep->ep->maxburst = comp_desc->bMaxBurst + 1;
 
-		ret = config_ep_by_speed(func->gadget, &func->function, ep->ep);
-		if (ret) {
-			pr_err("%s(): config_ep_by_speed(%d) err for %s\n",
-						__func__, ret, ep->ep->name);
-			break;
-		}
+		if (needs_comp_desc)
+			ep->ep->comp_desc = comp_desc;
 
 		ret = usb_ep_enable(ep->ep);
 		if (likely(!ret)) {
